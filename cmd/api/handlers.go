@@ -20,19 +20,19 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 
 	user, err := app.Models.User.GetByEmail(requestPayload.Email)
 	if err != nil {
-		app.errorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
+		app.errorJSON(w, errors.New("błędne dane logowania"), http.StatusBadRequest)
 		return
 	}
 
 	valid, err := user.PasswordMatches(requestPayload.Password)
 	if err != nil || !valid {
-		app.errorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
+		app.errorJSON(w, errors.New("błędne dane logowania"), http.StatusBadRequest)
 		return
 	}
 
 	payload := jsonResponse{
 		Error:   false,
-		Message: fmt.Sprintf("Logged in user %s", user.Email),
+		Message: fmt.Sprintf("Zalogowano użytkownika %s", user.Email),
 		Data:    user,
 	}
 

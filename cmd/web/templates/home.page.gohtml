@@ -4,29 +4,37 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1 class="mt-5">Mikroserwisy</h1>
+                <h1 class="mt-5">Użytkownik</h1>
                 <hr>
-                 <label>Email:</label>
-                <input id="emailIn" type="text" name="email"><br>
-                <label>Hasło:</label>
-                <input id="passwordIn" type="password" name="password"><br>                
-                 <a id="authBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Autentykacja</a>
-                <div id="output" class="mt-5" style="outline: 1px solid silver; padding: 2em;">
-                    <span class="text-muted">Wynik</span>
-                </div>
+                <label for="email" class="form-label">Email</label>
+                <input class="form-control" id="email" type="email" name="email" required="" autocomplete="email-new"><br>
+                <label for="password" class="form-label">Hasło</label>
+                <input class="form-control" id="password" type="password" name="password" required="" autocomplete="password-new"><br>                
+                <div class="col text-center">
+                    <a id="authBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Zaloguj użytkownika</a>
+                    <a id="createBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Dodaj użytkownika<a>
+                </div>                
             </div>
         </div>
+        
+        <div class="row">
+            <div class="col">
+                <h4 class="mt-5">Odpowiedź</h4>
+                <div id="output" class="mt-1" style="outline: 1px solid silver; padding: 2em;"></div>
+            </div>            
+        </div>
+        
         <div class="row">
             <div class="col">
                 <h4 class="mt-5">Wysłane</h4>
                 <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
-                    <pre id="payload"><span class="text-muted">Nic nie wysłano</span></pre>
+                    <pre id="payload"><span class="text-muted"></span></pre>
                 </div>
             </div>
             <div class="col">
                 <h4 class="mt-5">Otrzymane</h4>
                 <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
-                    <pre id="received"><span class="text-muted">Nic nie otrzymano</span></pre>
+                    <pre id="received"><span class="text-muted"></span></pre>
                 </div>
             </div>
         </div>
@@ -35,8 +43,8 @@
 
 {{define "js"}}
     <script>
-    let emailInput = document.getElementById("emailIn");
-    let passwordInput = document.getElementById("passwordIn");
+    let emailInput = document.getElementById("email");
+    let passwordInput = document.getElementById("password");
     let authBtn = document.getElementById("authBtn");
     let output = document.getElementById("output");
     let sent = document.getElementById("payload");
@@ -64,13 +72,13 @@
             sent.innerHTML = JSON.stringify(payload, undefined, 4);
             received.innerHTML = JSON.stringify(data, undefined, 4);
             if (data.error) {
-                output.innerHTML += `<br><strong>Błąd:</strong> ${data.message}`;
+                output.innerHTML += `<strong>Błąd:</strong> ${data.message}<br>`;
             } else {
-                output.innerHTML += `<br><strong>Odpowiedź</strong>: ${data.message}`;
+                output.innerHTML += `<strong>Sukces:</strong> ${data.message}<br>`;
             }
         })
         .catch((error) => {
-            output.innerHTML += "<br><br>Błąd: " + error;
+            output.innerHTML += "Błąd: " + error + "<br><br>";
         })
     })    
         
