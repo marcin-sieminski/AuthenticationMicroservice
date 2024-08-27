@@ -4,9 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/marcin-sieminski/AuthenticationService/models"
 )
 
-func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
+func (app *application) Authenticate(w http.ResponseWriter, r *http.Request) {
 	var requestPayload struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -18,22 +21,35 @@ func (app *Config) Authenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := app.Models.User.GetByEmail(requestPayload.Email)
+	user, err := app.DB.GetUserByEmail(requestPayload.Email)
 	if err != nil {
 		app.errorJSON(w, errors.New("błędne dane logowania"), http.StatusBadRequest)
 		return
 	}
 
-	valid, err := user.PasswordMatches(requestPayload.Password)
+	valid, err := app.DB.PasswordMatches(user.Password, requestPayload.Password)
 	if err != nil || !valid {
-		app.errorJSON(w, errors.New("błędne dane logowania"), http.StatusBadRequest)
+		app.invalidCredentials(w)
+		return
+	}
+
+	token, err := models.GenerateToken(user.ID, 24*time.Hour, models.ScopeAuthentication)
+	if err != nil {
+		app.invalidCredentials(w)
+		return
+	}
+
+	err = app.DB.InsertToken(token, user)
+	if err != nil {
+		app.badRequest(w, r, err)
 		return
 	}
 
 	payload := jsonResponse{
 		Error:   false,
 		Message: fmt.Sprintf("Zalogowano użytkownika %s", user.Email),
-		Data:    user,
+		User:    user,
+		Token:   token,
 	}
 
 	app.writeJSON(w, http.StatusAccepted, payload)

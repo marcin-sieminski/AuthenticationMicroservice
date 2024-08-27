@@ -8,20 +8,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/marcin-sieminski/AuthenticationService/data"
-
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/marcin-sieminski/AuthenticationService/models"
 )
 
 const webPort = "81"
 
 var counts int64
 
-type Config struct {
-	DB     *sql.DB
-	Models data.Models
+type application struct {
+	DB models.DBModel
 }
 
 func main() {
@@ -32,9 +30,8 @@ func main() {
 		log.Panic("Can't connect to Postgres!")
 	}
 
-	app := Config{
-		DB:     conn,
-		Models: data.New(conn),
+	app := application{
+		DB: models.DBModel{DB: conn},
 	}
 
 	srv := &http.Server{

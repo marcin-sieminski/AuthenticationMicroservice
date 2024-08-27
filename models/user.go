@@ -1,4 +1,4 @@
-package data
+package models
 
 import (
 	"context"
@@ -12,18 +12,18 @@ import (
 
 const dbTimeout = time.Second * 3
 
-var db *sql.DB
-
-func New(dbPool *sql.DB) Models {
-	db = dbPool
-
-	return Models{
-		User: User{},
-	}
+type DBModel struct {
+	DB *sql.DB
 }
 
 type Models struct {
-	User User
+	DB DBModel
+}
+
+func New(db *sql.DB) Models {
+	return Models{
+		DB: DBModel{DB: db},
+	}
 }
 
 type User struct {
@@ -37,14 +37,14 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func (u *User) GetAll() ([]*User, error) {
+func (m *DBModel) GetAll() ([]*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at
 	from users order by last_name`
 
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -75,14 +75,14 @@ func (u *User) GetAll() ([]*User, error) {
 	return users, nil
 }
 
-func (u *User) GetByEmail(email string) (*User, error) {
+func (m *DBModel) GetUserByEmail(email string) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at from users where email = $1`
 
 	var user User
-	row := db.QueryRowContext(ctx, query, email)
+	row := m.DB.QueryRowContext(ctx, query, email)
 
 	err := row.Scan(
 		&user.ID,
@@ -102,14 +102,14 @@ func (u *User) GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (u *User) GetOne(id int) (*User, error) {
+func (m *DBModel) GetOne(id int) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at from users where id = $1`
 
 	var user User
-	row := db.QueryRowContext(ctx, query, id)
+	row := m.DB.QueryRowContext(ctx, query, id)
 
 	err := row.Scan(
 		&user.ID,
@@ -129,7 +129,7 @@ func (u *User) GetOne(id int) (*User, error) {
 	return &user, nil
 }
 
-func (u *User) Update() error {
+func (m *DBModel) Update(u User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -142,7 +142,7 @@ func (u *User) Update() error {
 		where id = $6
 	`
 
-	_, err := db.ExecContext(ctx, stmt,
+	_, err := m.DB.ExecContext(ctx, stmt,
 		u.Email,
 		u.FirstName,
 		u.LastName,
@@ -158,13 +158,13 @@ func (u *User) Update() error {
 	return nil
 }
 
-func (u *User) Delete() error {
+func (m *DBModel) Delete(userId int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	stmt := `delete from users where id = $1`
 
-	_, err := db.ExecContext(ctx, stmt, u.ID)
+	_, err := m.DB.ExecContext(ctx, stmt, userId)
 	if err != nil {
 		return err
 	}
@@ -172,13 +172,13 @@ func (u *User) Delete() error {
 	return nil
 }
 
-func (u *User) DeleteByID(id int) error {
+func (m *DBModel) DeleteByID(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	stmt := `delete from users where id = $1`
 
-	_, err := db.ExecContext(ctx, stmt, id)
+	_, err := m.DB.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func (u *User) DeleteByID(id int) error {
 	return nil
 }
 
-func (u *User) Insert(user User) (int, error) {
+func (m *DBModel) Insert(user User) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -199,7 +199,7 @@ func (u *User) Insert(user User) (int, error) {
 	stmt := `insert into users (email, first_name, last_name, password, user_active, created_at, updated_at)
 		values ($1, $2, $3, $4, $5, $6, $7) returning id`
 
-	err = db.QueryRowContext(ctx, stmt,
+	err = m.DB.QueryRowContext(ctx, stmt,
 		user.Email,
 		user.FirstName,
 		user.LastName,
@@ -216,7 +216,7 @@ func (u *User) Insert(user User) (int, error) {
 	return newID, nil
 }
 
-func (u *User) ResetPassword(password string) error {
+func (m *DBModel) ResetPassword(password string, userId int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -226,7 +226,7 @@ func (u *User) ResetPassword(password string) error {
 	}
 
 	stmt := `update users set password = $1 where id = $2`
-	_, err = db.ExecContext(ctx, stmt, hashedPassword, u.ID)
+	_, err = m.DB.ExecContext(ctx, stmt, hashedPassword, userId)
 	if err != nil {
 		return err
 	}
@@ -234,8 +234,8 @@ func (u *User) ResetPassword(password string) error {
 	return nil
 }
 
-func (u *User) PasswordMatches(plainText string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plainText))
+func (m *DBModel) PasswordMatches(hash, password string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):

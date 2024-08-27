@@ -4,7 +4,14 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1 class="mt-5">Użytkownik</h1>
+                
+                <div class="alert alert-danger text-center d-none" id="login-messages"></div>
+                
+                <form action="" method="post"
+                    name="login_form" id="login_form"
+                    class="d-block needs-validation charge-form"
+                    autocomplete="off" novalidate="">
+                <h1 class="mt-5 text-center">Uwierzytelnianie</h1>
                 <hr>
                 <label for="email" class="form-label">Email</label>
                 <input class="form-control" id="email" type="email" name="email" required="" autocomplete="email-new"><br>
@@ -13,7 +20,9 @@
                 <div class="col text-center">
                     <a id="authBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Zaloguj użytkownika</a>
                     <a id="createBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Dodaj użytkownika<a>
-                </div>                
+                </div>
+                </form>
+
             </div>
         </div>
         
