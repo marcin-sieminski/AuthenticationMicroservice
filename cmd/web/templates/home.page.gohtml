@@ -19,7 +19,6 @@
                 <input class="form-control" id="password" type="password" name="password" required="" autocomplete="password-new"><br>                
                 <div class="col text-center">
                     <a id="authBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Zaloguj użytkownika</a>
-                    <a id="createBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Dodaj użytkownika<a>
                 </div>
                 </form>
 
@@ -75,14 +74,18 @@
             headers: headers,
         }
 
-        fetch("http:\/\/localhost:81/authenticate", body)
+        fetch("{{.API}}/authenticate", body)
         .then((response) => response.json())
         .then((data) => {
             sent.innerHTML = JSON.stringify(payload, undefined, 4);
             received.innerHTML = JSON.stringify(data, undefined, 4);
             if (data.error) {
+                showError(data.message)
                 output.innerHTML += `<strong>Błąd:</strong> ${data.message}<br>`;
             } else {
+                localStorage.setItem('token', data.authentication_token.token);
+                localStorage.setItem('token_expiry', data.authentication_token.expiry);
+                showSuccess();
                 output.innerHTML += `<strong>Sukces:</strong> ${data.message}<br>`;
             }
         })
@@ -91,5 +94,20 @@
         })
     })    
         
+    let loginMessages = document.getElementById("login-messages");
+
+    function showError(msg) {
+        loginMessages.classList.add("alert-danger");
+        loginMessages.classList.remove("alert-success");
+        loginMessages.classList.remove("d-none");
+        loginMessages.innerText = msg;
+    }
+
+    function showSuccess() {
+        loginMessages.classList.remove("alert-danger");
+        loginMessages.classList.add("alert-success");
+        loginMessages.classList.remove("d-none");
+        loginMessages.innerText = "Użytkownik zalogowany";
+    }
     </script>
 {{end}}

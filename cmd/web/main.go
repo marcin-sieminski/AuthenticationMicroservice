@@ -7,6 +7,25 @@ import (
 	"net/http"
 )
 
+var (
+	cfg = config{api: "http://localhost:81"}
+	app = &application{
+		config: cfg,
+	}
+)
+
+type config struct {
+	api string
+}
+
+type application struct {
+	config config
+}
+
+type templateData struct {
+	API string
+}
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		render(w, "home.page.gohtml")
@@ -36,7 +55,9 @@ func render(w http.ResponseWriter, t string) {
 		return
 	}
 
-	if err := tmpl.Execute(w, nil); err != nil {
+	td := &templateData{API: app.config.api}
+
+	if err := tmpl.Execute(w, td); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
