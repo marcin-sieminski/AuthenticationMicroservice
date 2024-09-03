@@ -68,7 +68,7 @@ func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Reque
 		Message string `json:"message"`
 	}
 	payload.Error = false
-	payload.Message = fmt.Sprintf("Zalogowano użytkownika %s", user.Email)
+	payload.Message = fmt.Sprintf("Użytkownik %s zalogowany", user.Email)
 	app.writeJSON(w, http.StatusOK, payload)
 }
 

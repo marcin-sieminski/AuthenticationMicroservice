@@ -78,7 +78,7 @@ func (app *application) invalidCredentials(w http.ResponseWriter) error {
 	}
 
 	payload.Error = true
-	payload.Message = "invalid authentication credentials"
+	payload.Message = "błędne dane logowania"
 
 	err := app.writeJSON(w, http.StatusUnauthorized, payload)
 	if err != nil {
