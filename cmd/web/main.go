@@ -4,26 +4,24 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/alexedwards/scs/v2"
 )
 
 var (
-	session *scs.SessionManager
-	cfg     = config{api: "http://localhost:81"}
-	app     = &application{
-		config:  cfg,
-		Session: scs.New(),
+	cfg = config{
+		api:  "http://localhost:81",
+		port: 80}
+	app = &application{
+		config: cfg,
 	}
 )
 
 type config struct {
-	api string
+	api  string
+	port int
 }
 
 type application struct {
-	config  config
-	Session *scs.SessionManager
+	config config
 }
 
 type templateData struct {
@@ -32,7 +30,7 @@ type templateData struct {
 
 func main() {
 	fmt.Println("Starting front end service on port 80")
-	err := http.ListenAndServe(":80", nil)
+	err := http.ListenAndServe(":80", app.routes())
 	if err != nil {
 		log.Panic(err)
 	}
