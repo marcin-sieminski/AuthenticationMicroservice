@@ -8,7 +8,6 @@ import (
 
 func (app *application) routes() http.Handler {
 	mux := chi.NewRouter()
-	mux.Use(SessionLoad)
 
 	mux.Get("/", app.Home)
 
