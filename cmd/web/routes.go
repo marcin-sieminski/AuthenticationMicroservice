@@ -9,7 +9,7 @@ import (
 func (app *application) routes() http.Handler {
 	mux := chi.NewRouter()
 
-	mux.Get("/", app.Home)
+	mux.Get("/login", app.LoginPage)
 
 	mux.Route("/admin", func(mux chi.Router) {
 		mux.Use(app.Auth)
