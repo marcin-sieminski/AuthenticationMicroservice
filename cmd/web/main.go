@@ -25,7 +25,8 @@ type application struct {
 }
 
 type templateData struct {
-	API string
+	API             string
+	IsAuthenticated int
 }
 
 func main() {

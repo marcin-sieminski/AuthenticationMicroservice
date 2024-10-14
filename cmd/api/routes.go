@@ -16,13 +16,14 @@ func (app *application) routes() http.Handler {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
+		AllowCredentials: false,
 		MaxAge:           300,
 	}))
 
 	mux.Use(middleware.Heartbeat("/ping"))
 
 	mux.Post("/authenticate", app.Authenticate)
+	mux.Post("/api/is-authenticated", app.CheckAuthentication)
 
 	mux.Route("/admin", func(mux chi.Router) {
 		mux.Use(app.Auth)
