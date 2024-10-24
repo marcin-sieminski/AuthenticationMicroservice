@@ -12,7 +12,6 @@ func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 		"cmd/web/templates/header.partial.gohtml",
 		"cmd/web/templates/footer.partial.gohtml",
 		"cmd/web/templates/navbar.partial.gohtml",
-		"cmd/web/templates/service-info.partial.gohtml",
 	}
 
 	var templateSlice []string
@@ -38,7 +37,6 @@ func (app *application) LoginPage(w http.ResponseWriter, r *http.Request) {
 		"cmd/web/templates/header.partial.gohtml",
 		"cmd/web/templates/footer.partial.gohtml",
 		"cmd/web/templates/navbar.partial.gohtml",
-		"cmd/web/templates/service-info.partial.gohtml",
 	}
 
 	var templateSlice []string
@@ -92,7 +90,6 @@ func (app *application) AllUsers(w http.ResponseWriter, r *http.Request) {
 		"cmd/web/templates/header.partial.gohtml",
 		"cmd/web/templates/footer.partial.gohtml",
 		"cmd/web/templates/navbar.partial.gohtml",
-		"cmd/web/templates/service-info.partial.gohtml",
 	}
 
 	var templateSlice []string

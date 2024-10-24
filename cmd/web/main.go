@@ -75,6 +75,8 @@ func main() {
 		errorLog: errorLog,
 	}
 
+	go app.ListenToWsChannel()
+
 	err = http.ListenAndServe(":80", app.routes())
 	if err != nil {
 		log.Panic(err)

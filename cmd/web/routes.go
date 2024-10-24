@@ -14,6 +14,8 @@ func (app *application) routes() http.Handler {
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
 	mux.Get("/", app.Home)
+	mux.Get("/ws", app.WsEndPoint)
+
 	mux.Get("/login", app.LoginPage)
 	mux.Post("/login", app.PostLoginPage)
 	mux.Get("/logout", app.Logout)
