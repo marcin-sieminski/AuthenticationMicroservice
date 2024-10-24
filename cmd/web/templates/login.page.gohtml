@@ -9,7 +9,7 @@
                 
                 <div class="alert alert-danger text-center d-none" id="login-messages"></div>
                 
-                <form action="" method="post"
+                <form action="" method="post" action="/login"
                     name="login_form" id="login_form"
                     class="d-block needs-validation charge-form"
                     autocomplete="off" novalidate="">
@@ -25,7 +25,6 @@
                 </form>
             </div>
         </div>       
-        <hr>
     </div>
 {{end}}
 
@@ -34,12 +33,17 @@
     let emailInput = document.getElementById("email");
     let passwordInput = document.getElementById("password");
     let authBtn = document.getElementById("authBtn");
-    let output = document.getElementById("output");
-    let sent = document.getElementById("payload");
-    let recevied = document.getElementById("received");
     
     authBtn.addEventListener("click", function() {
-
+        let form = document.getElementById("login_form");
+        if (form.checkValidity() === false) {
+            this.event.preventDefault();
+            this.event.stopPropagation();
+            form.classList.add("was-validated");
+            return;
+        }
+        form.classList.add("was-validated");
+        
         const payload = {
             email: emailInput.value,
             password: passwordInput.value,
@@ -57,20 +61,16 @@
         fetch("{{.API}}/authenticate", body)
         .then((response) => response.json())
         .then((data) => {
-            sent.innerHTML = JSON.stringify(payload, undefined, 4);
-            received.innerHTML = JSON.stringify(data, undefined, 4);
             if (data.error) {
                 showError(data.message)
-                output.innerHTML += `<strong>Błąd:</strong> ${data.message}<br>`;
             } else {
                 localStorage.setItem('token', data.authentication_token.token);
                 localStorage.setItem('token_expiry', data.authentication_token.expiry);
                 showSuccess();
-                output.innerHTML += `<strong>Sukces:</strong> ${data.message}<br>`;
+                document.getElementById("login_form").submit();
             }
         })
         .catch((error) => {
-            output.innerHTML += "Błąd: " + error + "<br><br>";
         })
     })    
         

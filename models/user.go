@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const dbTimeout = time.Second * 3
+const dbTimeout = time.Second * 30
 
 type DBModel struct {
 	DB *sql.DB
@@ -31,13 +31,13 @@ type User struct {
 	Email     string    `json:"email"`
 	FirstName string    `json:"first_name,omitempty"`
 	LastName  string    `json:"last_name,omitempty"`
-	Password  string    `json:"-"`
+	Password  string    `json:"password"`
 	Active    int       `json:"active"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func (m *DBModel) GetAll() ([]*User, error) {
+func (m *DBModel) GetAllUsers() ([]*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -102,7 +102,7 @@ func (m *DBModel) GetUserByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (m *DBModel) GetOne(id int) (*User, error) {
+func (m *DBModel) GetOneUser(id int) (*User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -163,22 +163,13 @@ func (m *DBModel) Delete(userId int) error {
 	defer cancel()
 
 	stmt := `delete from users where id = $1`
-
 	_, err := m.DB.ExecContext(ctx, stmt, userId)
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (m *DBModel) DeleteByID(id int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-	defer cancel()
-
-	stmt := `delete from users where id = $1`
-
-	_, err := m.DB.ExecContext(ctx, stmt, id)
+	stmt = `delete from tokens where user_id = $1`
+	_, err = m.DB.ExecContext(ctx, stmt, userId)
 	if err != nil {
 		return err
 	}
@@ -246,4 +237,27 @@ func (m *DBModel) PasswordMatches(hash, password string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (m *DBModel) Authenticate(email, password string) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	var id int
+	var hashedPassword string
+
+	row := m.DB.QueryRowContext(ctx, "select id, password from users where email = $1", email)
+	err := row.Scan(&id, &hashedPassword)
+	if err != nil {
+		return id, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		return 0, errors.New("hasło nieprawidłowe")
+	} else if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
 
@@ -20,13 +19,16 @@ func (app *application) routes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	mux.Use(middleware.Heartbeat("/ping"))
-
 	mux.Post("/authenticate", app.Authenticate)
-	mux.Post("/api/is-authenticated", app.CheckAuthentication)
+	mux.Post("/is-authenticated", app.CheckAuthentication)
 
 	mux.Route("/admin", func(mux chi.Router) {
 		mux.Use(app.Auth)
+
+		mux.Post("/all-users", app.AllUsers)
+		mux.Post("/all-users/{id}", app.OneUser)
+		mux.Post("/all-users/edit/{id}", app.EditUser)
+		mux.Post("/all-users/delete/{id}", app.DeleteUser)
 	})
 
 	return mux

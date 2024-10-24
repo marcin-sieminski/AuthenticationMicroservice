@@ -12,55 +12,40 @@
             <a class="nav-link active" aria-current="page" href="/">Start</a>
           </li>
         
+          {{if eq .IsAuthenticated true}}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Administracja</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li>
-                <a class="dropdown-item" id="service-btn" role="button">                  
-                  <input type="checkbox" id="service-info-checkbox">
-                  Pokaż informacje z serwisu
-                </a>
-              </li>        
-              {{if eq .IsAuthenticated 1}}
-                <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="/admin/all-users">Użytkownicy</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/logout">Wylogowanie</a></li>
-              {{end}}
+                <li><a class="dropdown-item" onclick="logout()" role="button">Wylogowanie</a></li>
+          {{end}}
             </ul>
           </li>
         </ul>
 
-        {{if eq .IsAuthenticated 1}}
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li id="login-link" class="nav-item">
-              <a class="nav-link" href="/logout">Wylogowanie</a></li>
-            </li>
-          </ul>
-        {{else}}
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-            <li class="nav-item">
+            {{if eq .IsAuthenticated true}}
+              <a class="nav-link" onclick="logout()" role="button">Wylogowanie</a></li>
+            {{else}}
               <a class="nav-link" href="/login">Logowanie</a></li>
+            {{end}}
             </li>
-          </ul>
-        {{end}}
       </div>
     </div>
   </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 <script>
-
-  {{if eq .IsAuthenticated 1}}
+{{/* 
+  {{if eq .IsAuthenticated true}}
   let socket;
   
   document.addEventListener("DOMContentLoaded", function() {
     socket = new WebSocket("ws://localhost:4000/ws")
 
-    socket.onopen = () => {
-      console.log("Successfully connected to websockets");
-    }
-
+    socket.onopen = () => { };
     socket.onclose = event => { };
 
     socket.onerror = error => { };
@@ -79,7 +64,7 @@
     }
 
   })
-  {{end}}
+  {{end}} */}}
 
   function logout() {
     localStorage.removeItem("token");
@@ -102,15 +87,12 @@
         headers: myHeaders,
       }
 
-      fetch("{{.API}}/api/is-authenticated", requestOptions)
+      fetch("{{.API}}/is-authenticated", requestOptions)
       .then(response => response.json())
       .then(function(data){
         if (data.error === true) {
-          console.log("not logged in");
           location.href = "/login";
-        } else {
-          console.log("Logged in");
-        }
+        } 
       })
     }
   }

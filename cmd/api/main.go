@@ -27,7 +27,7 @@ func main() {
 
 	conn := connectToDB()
 	if conn == nil {
-		log.Panic("Can't connect to Postgres!")
+		log.Panic("Brak połączenia z bazą danych")
 	}
 
 	app := application{

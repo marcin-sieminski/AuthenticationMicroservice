@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -49,7 +50,6 @@ func (app *application) Authenticate(w http.ResponseWriter, r *http.Request) {
 	payload := jsonResponse{
 		Error:   false,
 		Message: fmt.Sprintf("Zalogowano użytkownika %s", user.Email),
-		User:    user,
 		Token:   token,
 	}
 
@@ -94,4 +94,89 @@ func (app *application) authenticateToken(r *http.Request) (*models.User, error)
 	}
 
 	return user, nil
+}
+
+func (app *application) AllUsers(w http.ResponseWriter, r *http.Request) {
+	allUsers, err := app.DB.GetAllUsers()
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, allUsers)
+}
+
+func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
+	id := strings.Split(r.URL.Path, "/")[3]
+	userID, _ := strconv.Atoi(id)
+
+	user, err := app.DB.GetOneUser(userID)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, user)
+}
+
+func (app *application) EditUser(w http.ResponseWriter, r *http.Request) {
+	id := strings.Split(r.URL.Path, "/")[4]
+	userID, _ := strconv.Atoi(id)
+
+	var user models.User
+
+	err := app.readJSON(w, r, &user)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	if userID > 0 {
+		err = app.DB.Update(user)
+		if err != nil {
+			app.badRequest(w, r, err)
+			return
+		}
+
+		if user.Password != "" {
+			err = app.DB.ResetPassword(user.Password, userID)
+			if err != nil {
+				app.badRequest(w, r, err)
+				return
+			}
+		}
+	} else {
+		_, err = app.DB.Insert(user)
+		if err != nil {
+			app.badRequest(w, r, err)
+			return
+		}
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	app.writeJSON(w, http.StatusOK, resp)
+}
+
+func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	id := strings.Split(r.URL.Path, "/")[4]
+	userID, _ := strconv.Atoi(id)
+
+	err := app.DB.Delete(userID)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	app.writeJSON(w, http.StatusOK, resp)
 }
