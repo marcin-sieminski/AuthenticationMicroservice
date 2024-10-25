@@ -3,7 +3,11 @@
         <div class="row">
             <div class="col text-center">
                 <hr>
-                <small class="text-muted">Marcin Siemiński (2024)</small>
+                {{if eq .IsAuthenticated true}}                
+                    <small class="text-muted">Zalogowano {{ .UserName }}</small>
+                {{else}}
+                    <small class="text-muted">Niezalogowano</small>
+                {{end}}
             </div>
         </div>
     </div>

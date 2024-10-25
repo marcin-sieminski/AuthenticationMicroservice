@@ -73,6 +73,11 @@ func (app *application) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := app.DB.GetOneUser(id)
+	if err != nil {
+		return
+	}
+	app.Session.Put(r.Context(), "userName", fmt.Sprintf("%s %s", user.FirstName, user.LastName))
 	app.Session.Put(r.Context(), "userID", id)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -141,6 +146,7 @@ func (app *application) addDefaultData(r *http.Request) *templateData {
 	if app.Session.Exists(r.Context(), "userID") {
 		td.IsAuthenticated = true
 		td.UserID = app.Session.GetInt(r.Context(), "userID")
+		td.UserName = app.Session.GetString(r.Context(), "userName")
 	} else {
 		td.IsAuthenticated = false
 		td.UserID = 0

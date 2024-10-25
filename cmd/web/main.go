@@ -32,6 +32,7 @@ type templateData struct {
 	API             string
 	IsAuthenticated bool
 	UserID          int
+	UserName        string
 }
 
 type application struct {
