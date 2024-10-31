@@ -1,0 +1,104 @@
+{{template "base" .}}
+
+{{define "title"}}
+    Zapytanie
+{{end}}
+
+{{define "content"}}
+<div class="container">
+        <div class="row">
+            <div class="col">
+<h2 class="mt-5">Wysyłanie zapytania</h2>
+<hr>
+
+<form method="post" action="" name="prompt_form" id="prompt_form" class="needs-validation" autocomplete="off" novalidate="" onsubmit="return handleFormSubmit(event)">
+
+    <div class="mb-3">
+        <label for="prompt_input" class="form-label">Pytanie</label>
+        <input type="text" class="form-control" id="prompt_input" name="prompt_input"
+            required="" autocomplete="off">
+    </div>
+    
+    <hr>
+
+    <div class="float-start">
+        <a class="btn btn-primary" href="javascript:void(0);" onclick="sendRequest()" id="sendBtn">Wyślij</a>
+        <a class="btn btn-warning" href="/" id="cancelBtn">Anuluj</a>
+    </div>
+
+    <div class="clearfix"></div>
+</form>
+
+<div class="row">
+    <div class="col">
+        <p class="mt-5">Pytanie</p>
+        <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
+            <div id="prompt"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <p class="mt-5">Odpowiedź</p>
+        <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
+            <div id="response"></div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+{{end}}
+
+{{define "js"}}
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+let token = localStorage.getItem("token");
+
+function sendRequest() {
+    let form = document.getElementById("prompt_form");
+    if (form.checkValidity() === false) {
+        this.event.preventDefault();
+        this.event.stopPropagation();
+        form.classList.add("was-validated");
+        return
+    }
+    form.classList.add("was-validated");
+
+    let payload = {
+        prompt: document.getElementById("prompt_input").value,
+    }
+
+    const requestOptions = {
+        method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token,
+            },
+        body: JSON.stringify(payload),
+    }
+
+    fetch("{{.API}}/auth/ask", requestOptions)
+    .then(response => response.json())
+    .then(function(data){
+        if (data.error) {
+            Swal.fire("Error: " + data.message);
+        } else {
+            document.getElementById("prompt").innerHTML = document.getElementById("prompt_input").value;            
+            document.getElementById("response").innerHTML = data;
+            document.getElementById("prompt_input").value = "";
+            form.classList.remove("was-validated");
+        }
+    })
+}
+
+function handleFormSubmit(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    sendRequest();
+}
+</script>
+{{end}}

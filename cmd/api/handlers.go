@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/marcin-sieminski/AuthenticationService/models"
+	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func (app *application) Authenticate(w http.ResponseWriter, r *http.Request) {
@@ -179,4 +181,28 @@ func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	resp.Error = false
 	app.writeJSON(w, http.StatusOK, resp)
+}
+
+func (app *application) Ask(w http.ResponseWriter, r *http.Request) {
+	var requestData struct {
+		Prompt string `json:"prompt"`
+	}
+	if err := app.readJSON(w, r, &requestData); err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	llm, err := openai.New()
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	completion, err := llm.Call(context.Background(), requestData.Prompt)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, completion)
 }

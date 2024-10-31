@@ -139,6 +139,31 @@ func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) Ask(w http.ResponseWriter, r *http.Request) {
+	partials := []string{
+		"cmd/web/templates/base.layout.gohtml",
+		"cmd/web/templates/header.partial.gohtml",
+		"cmd/web/templates/footer.partial.gohtml",
+		"cmd/web/templates/navbar.partial.gohtml",
+	}
+
+	var templateSlice []string
+	templateSlice = append(templateSlice, fmt.Sprintf("cmd/web/templates/%s", "ask.page.gohtml"))
+	templateSlice = append(templateSlice, partials...)
+
+	tmpl, err := template.ParseFiles(templateSlice...)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	td := app.addDefaultData(r)
+
+	if err := tmpl.Execute(w, td); err != nil {
+		app.errorLog.Println(err)
+	}
+}
+
 func (app *application) addDefaultData(r *http.Request) *templateData {
 	td := &templateData{}
 	td.API = app.config.api

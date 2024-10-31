@@ -13,10 +13,14 @@
           </li>
         
           {{if eq .IsAuthenticated true}}
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/auth/ask">Zapytanie</a>
+          </li>
+        
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Administracja</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="/admin/all-users">Użytkownicy</a></li>
+                <li><a class="dropdown-item" href="/auth/all-users">Użytkownicy</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" onclick="logout()" role="button">Wylogowanie</a></li>
           {{end}}
@@ -38,28 +42,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 <script>
-{{if eq .IsAuthenticated true}}
-  let socket;
-  document.addEventListener("DOMContentLoaded", function() {
-    socket = new WebSocket("ws://localhost/ws")
-
-    socket.onopen = () => { };
-    socket.onclose = event => { };
-    socket.onerror = error => { };
-    socket.onmessage = msg => {
-      let data = JSON.parse(msg.data);
-      switch (data.action) {
-        case "logout":
-          if (data.user_id === {{.UserID}}) {
-            logout();
-          }
-          break;
-        default:
-      }
-    }
-  })
-{{end}}
-
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("token_expiry");

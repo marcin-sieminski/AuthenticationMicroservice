@@ -22,13 +22,14 @@ func (app *application) routes() http.Handler {
 	mux.Post("/authenticate", app.Authenticate)
 	mux.Post("/is-authenticated", app.CheckAuthentication)
 
-	mux.Route("/admin", func(mux chi.Router) {
+	mux.Route("/auth", func(mux chi.Router) {
 		mux.Use(app.Auth)
 
 		mux.Post("/all-users", app.AllUsers)
 		mux.Post("/all-users/{id}", app.OneUser)
 		mux.Post("/all-users/edit/{id}", app.EditUser)
 		mux.Post("/all-users/delete/{id}", app.DeleteUser)
+		mux.Post("/ask", app.Ask)
 	})
 
 	return mux

@@ -1,33 +1,29 @@
 {{template "base" .}}
 
-{{define "title"}}
-    Użytkownicy
-{{end}}
+{{define "title"}}Użytkownicy{{end}}
 
 {{define "content"}}
 <div class="container">
-        <div class="row">
-            <div class="col">
+    <div class="row">
+        <div class="col">
             <h2 class="mt-5">Użytkownicy</h2>
-<hr>
-<div class="float-end">
-    <a class="btn btn-outline-secondary" href="/admin/all-users/0">Dodaj użytkownika</a>
-</div>
-<div class="clearfix"></div>
+        <hr>
+        <div class="float-end">
+            <a class="btn btn-outline-secondary" href="/auth/all-users/0">Dodaj użytkownika</a>
+        </div>
+        <div class="clearfix"></div>
 
-<table id="user-table" class="table table-striped">
-<thead>
-    <tr>
-        <th>Użytkownik</th>
-        <th>Email</th>
-    </tr>
-</thead>
-<tbody>
-
-</tbody>
-</table>
-</div>
-</div>
+        <table id="user-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Użytkownik</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        </div>
+    </div>
 </div>
 {{end}}
 
@@ -46,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function() {
         },
     }
 
-    fetch("{{.API}}/admin/all-users", requestOptions)
+    fetch("{{.API}}/auth/all-users", requestOptions)
     .then(response => response.json())
     .then(function (data) {        
         if (data) {
@@ -54,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 let newRow = tbody.insertRow();
                 let newCell = newRow.insertCell();
 
-                newCell.innerHTML = `<a href="/admin/all-users/${i.id}">${i.last_name}, ${i.first_name}</a>`;
+                newCell.innerHTML = `<a href="/auth/all-users/${i.id}">${i.last_name}, ${i.first_name}</a>`;
 
                 newCell = newRow.insertCell();
                 let item = document.createTextNode(i.email);
