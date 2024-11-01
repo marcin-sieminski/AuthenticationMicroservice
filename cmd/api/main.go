@@ -19,7 +19,8 @@ const webPort = "81"
 var counts int64
 
 type application struct {
-	DB models.DBModel
+	DB                  models.DBModel
+	conversationHistory []string
 }
 
 func main() {

@@ -198,11 +198,19 @@ func (app *application) Ask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	completion, err := llm.Call(context.Background(), requestData.Prompt)
+	app.conversationHistory = append(app.conversationHistory, requestData.Prompt)
+	conversation := strings.Join(app.conversationHistory, "\n")
+
+	completion, err := llm.Call(context.Background(), conversation)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
 
+	app.conversationHistory = append(app.conversationHistory, completion)
 	app.writeJSON(w, http.StatusOK, completion)
+}
+
+func (app *application) AskReset(w http.ResponseWriter, r *http.Request) {
+	app.conversationHistory = nil
 }
