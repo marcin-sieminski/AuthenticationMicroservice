@@ -1,0 +1,69 @@
+{{template "base" .}}
+
+{{define "title"}}Użytkownicy{{end}}
+
+{{define "content"}}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2 class="mt-5">Użytkownicy</h2>
+        <hr>
+        <div class="float-end">
+            <a class="btn btn-outline-secondary" href="/auth/all-users/0">Dodaj użytkownika</a>
+        </div>
+        <div class="clearfix"></div>
+
+        <table id="user-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Użytkownik</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "js"}}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let tbody = document.getElementById("user-table").getElementsByTagName("tbody")[0];
+    let token = localStorage.getItem("token");
+
+    const requestOptions = {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+        },
+    }
+
+    fetch("{{.API}}/auth/all-users", requestOptions)
+    .then(response => response.json())
+    .then(function (data) {        
+        if (data) {
+            data.forEach(function(i) {
+                let newRow = tbody.insertRow();
+                let newCell = newRow.insertCell();
+
+                newCell.innerHTML = `<a href="/auth/all-users/${i.id}">${i.last_name}, ${i.first_name}</a>`;
+
+                newCell = newRow.insertCell();
+                let item = document.createTextNode(i.email);
+                newCell.appendChild(item);
+            });
+        } else {
+            let newRow = tbody.insertRow();
+            let newCell = tbody.insertCell();
+            newCell.setAttribute("colspan", "2");
+            newCell.innerHTML = "no data available";
+        }
+    })
+})
+
+</script>
+{{end}}

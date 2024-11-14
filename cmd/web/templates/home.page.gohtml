@@ -1,113 +1,21 @@
 {{template "base" .}}
 
-{{define "content" }}
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                
-                <div class="alert alert-danger text-center d-none" id="login-messages"></div>
-                
-                <form action="" method="post"
-                    name="login_form" id="login_form"
-                    class="d-block needs-validation charge-form"
-                    autocomplete="off" novalidate="">
-                <h1 class="mt-5 text-center">Uwierzytelnianie</h1>
-                <hr>
-                <label for="email" class="form-label">Email</label>
-                <input class="form-control" id="email" type="email" name="email" required="" autocomplete="email-new"><br>
-                <label for="password" class="form-label">Hasło</label>
-                <input class="form-control" id="password" type="password" name="password" required="" autocomplete="password-new"><br>                
-                <div class="col text-center">
-                    <a id="authBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Zaloguj użytkownika</a>
-                </div>
-                </form>
+{{define "title"}}Logowanie{{end}}
 
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col">
-                <h4 class="mt-5">Odpowiedź</h4>
-                <div id="output" class="mt-1" style="outline: 1px solid silver; padding: 2em;"></div>
-            </div>            
-        </div>
-        
-        <div class="row">
-            <div class="col">
-                <h4 class="mt-5">Wysłane</h4>
-                <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
-                    <pre id="payload"><span class="text-muted"></span></pre>
-                </div>
-            </div>
-            <div class="col">
-                <h4 class="mt-5">Otrzymane</h4>
-                <div class="mt-1" style="outline: 1px solid silver; padding: 2em;">
-                    <pre id="received"><span class="text-muted"></span></pre>
-                </div>
-            </div>
+{{define "content" }}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2 class="mt-5">Serwisy AI</h2>
+            <hr>
+            Aplikacja do obsługi serwisów AI.
         </div>
     </div>
+</div>
 {{end}}
 
 {{define "js"}}
     <script>
-    let emailInput = document.getElementById("email");
-    let passwordInput = document.getElementById("password");
-    let authBtn = document.getElementById("authBtn");
-    let output = document.getElementById("output");
-    let sent = document.getElementById("payload");
-    let recevied = document.getElementById("received");
     
-    authBtn.addEventListener("click", function() {
-
-        const payload = {
-            email: emailInput.value,
-            password: passwordInput.value,
-        }
-
-        const headers = new Headers();
-        headers.append("Content-Type", "application/json");
-
-        const body = {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: headers,
-        }
-
-        fetch("{{.API}}/authenticate", body)
-        .then((response) => response.json())
-        .then((data) => {
-            sent.innerHTML = JSON.stringify(payload, undefined, 4);
-            received.innerHTML = JSON.stringify(data, undefined, 4);
-            if (data.error) {
-                showError(data.message)
-                output.innerHTML += `<strong>Błąd:</strong> ${data.message}<br>`;
-            } else {
-                localStorage.setItem('token', data.authentication_token.token);
-                localStorage.setItem('token_expiry', data.authentication_token.expiry);
-                showSuccess();
-                output.innerHTML += `<strong>Sukces:</strong> ${data.message}<br>`;
-            }
-        })
-        .catch((error) => {
-            output.innerHTML += "Błąd: " + error + "<br><br>";
-        })
-    })    
-        
-    let loginMessages = document.getElementById("login-messages");
-
-    function showError(msg) {
-        loginMessages.classList.add("alert-danger");
-        loginMessages.classList.remove("alert-success");
-        loginMessages.classList.remove("d-none");
-        loginMessages.innerText = msg;
-    }
-
-    function showSuccess() {
-        loginMessages.classList.remove("alert-danger");
-        loginMessages.classList.add("alert-success");
-        loginMessages.classList.remove("d-none");
-        loginMessages.innerText = "Użytkownik zalogowany";
-    }
     </script>
 {{end}}

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
+	"fmt"
 	"log"
 	"time"
 )
@@ -41,7 +42,7 @@ func GenerateToken(userID int, ttl time.Duration, scope string) (*Token, error) 
 }
 
 func (m *DBModel) InsertToken(t *Token, u *User) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	stmt := `delete from tokens where user_id = $1`
@@ -50,13 +51,15 @@ func (m *DBModel) InsertToken(t *Token, u *User) error {
 		return err
 	}
 
+	tokenHashHex := fmt.Sprintf("%x", t.Hash)
+
 	stmt = `insert into tokens (user_id, name, email, token_hash, expiry, created_at, updated_at) values ($1, $2, $3, $4, $5, $6, $7)`
 
 	_, err = m.DB.ExecContext(ctx, stmt,
 		u.ID,
 		u.LastName,
 		u.Email,
-		t.Hash,
+		tokenHashHex,
 		t.Expiry,
 		time.Now(),
 		time.Now(),
@@ -70,24 +73,17 @@ func (m *DBModel) InsertToken(t *Token, u *User) error {
 }
 
 func (m *DBModel) GetUserForToken(token string) (*User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	tokenHash := sha256.Sum256([]byte(token))
 	var user User
 
-	query := `
-		select
-			u.id, u.first_name, u.last_name, u.email
-		from
-			users u
-			inner join tokens t on (u.id = t.user_id)
-		where
-			t.token_hash = ?
-			and t.expiry > ?
-	`
+	tokenHash := sha256.Sum256([]byte(token))
+	tokenHashHex := fmt.Sprintf("%x", tokenHash)
 
-	err := m.DB.QueryRowContext(ctx, query, tokenHash[:], time.Now()).Scan(
+	query := `select u.id, u.first_name, u.last_name, u.email from users u inner join tokens t on u.id = t.user_id where t.token_hash = $1 and t.expiry > $2`
+	row := m.DB.QueryRowContext(ctx, query, tokenHashHex[:], time.Now())
+	err := row.Scan(
 		&user.ID,
 		&user.FirstName,
 		&user.LastName,

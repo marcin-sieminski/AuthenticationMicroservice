@@ -8,11 +8,23 @@ import (
 
 func (app *application) routes() http.Handler {
 	mux := chi.NewRouter()
+	mux.Use(SessionLoad)
+
+	fileServer := http.FileServer(http.Dir("./static"))
+	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
 	mux.Get("/", app.Home)
+	mux.Get("/ws", app.WsEndPoint)
 
-	mux.Route("/admin", func(mux chi.Router) {
+	mux.Get("/login", app.LoginPage)
+	mux.Post("/login", app.PostLoginPage)
+	mux.Get("/logout", app.Logout)
+
+	mux.Route("/auth", func(mux chi.Router) {
 		mux.Use(app.Auth)
+		mux.Get("/all-users", app.AllUsers)
+		mux.Get("/all-users/{id}", app.OneUser)
+		mux.Get("/ask", app.Ask)
 	})
 
 	return mux

@@ -1,0 +1,93 @@
+{{template "base" .}}
+
+{{define "title"}}Logowanie{{end}}
+
+{{define "content" }}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                
+                <div class="alert alert-danger text-center d-none" id="login-messages"></div>
+                
+                <form action="" method="post" action="/login"
+                    name="login_form" id="login_form"
+                    class="d-block needs-validation charge-form"
+                    autocomplete="off" novalidate="">
+                <h1 class="mt-5 text-center">Logowanie</h1>
+                <hr>
+                <label for="email" class="form-label">Email</label>
+                <input class="form-control" id="email" type="email" name="email" required="" autocomplete="email-new"><br>
+                <label for="password" class="form-label">Hasło</label>
+                <input class="form-control" id="password" type="password" name="password" required="" autocomplete="password-new"><br>                
+                <div class="col text-center">
+                    <a id="authBtn" class="btn btn-outline-secondary" href="javascript:void(0);">Zaloguj użytkownika</a>
+                </div>
+                </form>
+            </div>
+        </div>       
+    </div>
+{{end}}
+
+{{define "js"}}
+    <script>
+    let emailInput = document.getElementById("email");
+    let passwordInput = document.getElementById("password");
+    let authBtn = document.getElementById("authBtn");
+    
+    authBtn.addEventListener("click", function() {
+        let form = document.getElementById("login_form");
+        if (form.checkValidity() === false) {
+            this.event.preventDefault();
+            this.event.stopPropagation();
+            form.classList.add("was-validated");
+            return;
+        }
+        form.classList.add("was-validated");
+        
+        const payload = {
+            email: emailInput.value,
+            password: passwordInput.value,
+        }
+
+        const headers = new Headers();
+        headers.append("Content-Type", "application/json");
+
+        const body = {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: headers,
+        }
+
+        fetch("{{.API}}/authenticate", body)
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.error) {
+                showError(data.message)
+            } else {
+                localStorage.setItem('token', data.authentication_token.token);
+                localStorage.setItem('token_expiry', data.authentication_token.expiry);
+                showSuccess();
+                document.getElementById("login_form").submit();
+            }
+        })
+        .catch((error) => {
+        })
+    })    
+        
+    let loginMessages = document.getElementById("login-messages");
+
+    function showError(msg) {
+        loginMessages.classList.add("alert-danger");
+        loginMessages.classList.remove("alert-success");
+        loginMessages.classList.remove("d-none");
+        loginMessages.innerText = msg;
+    }
+
+    function showSuccess() {
+        loginMessages.classList.remove("alert-danger");
+        loginMessages.classList.add("alert-success");
+        loginMessages.classList.remove("d-none");
+        loginMessages.innerText = "Użytkownik zalogowany";
+    }
+    </script>
+{{end}}

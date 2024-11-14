@@ -19,7 +19,8 @@ const webPort = "81"
 var counts int64
 
 type application struct {
-	DB models.DBModel
+	DB                  models.DBModel
+	conversationHistory []string
 }
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 
 	conn := connectToDB()
 	if conn == nil {
-		log.Panic("Can't connect to Postgres!")
+		log.Panic("Brak połączenia z bazą danych")
 	}
 
 	app := application{

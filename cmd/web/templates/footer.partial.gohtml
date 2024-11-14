@@ -3,8 +3,38 @@
         <div class="row">
             <div class="col text-center">
                 <hr>
-                <small class="text-muted">2024</small>
+                {{if eq .IsAuthenticated true}}                
+                    <small class="text-muted">Zalogowano: {{ .UserName }}</small>
+                {{else}}
+                    <small class="text-muted">Niezalogowano</small>
+                {{end}}
             </div>
         </div>
     </div>
+
+<script>
+{{if eq .IsAuthenticated true}}  
+  let socket;
+  document.addEventListener("DOMContentLoaded", function() {
+    socket = new WebSocket("ws://localhost:80/ws")
+
+    socket.onopen = () => { 
+      console.log("Connected to websockets"); 
+      }
+    socket.onclose = event => { };
+    socket.onerror = error => { };
+    socket.onmessage = msg => {
+      let data = JSON.parse(msg.data);
+      switch (data.action) {
+        case "logout":
+          if (data.user_id === {{.UserID}}) {
+            logout();
+          }
+          break;
+        default:
+      }
+    }
+  })
+{{end}}
+</script>
 {{end}}
