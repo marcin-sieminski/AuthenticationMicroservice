@@ -12,20 +12,32 @@
             <a class="nav-link active" aria-current="page" href="/">Start</a>
           </li>
         
-          {{if eq .IsAuthenticated true}}
-          <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/auth/ask">Zapytanie</a>
+        {{if eq .IsAuthenticated true}}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">OpenAI</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/auth/ask">Pytanie</a></li>
+            </ul>
           </li>
-        
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">RAG</a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/">Dodawanie treści</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/" role="button">Pytanie</a></li>
+            </ul>
+          </li>
+
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Administracja</a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="/auth/all-users">Użytkownicy</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" onclick="logout()" role="button">Wylogowanie</a></li>
-          {{end}}
             </ul>
           </li>
+        {{end}}
         </ul>
 
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
